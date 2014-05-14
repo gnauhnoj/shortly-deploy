@@ -1,6 +1,8 @@
 var Bookshelf = require('bookshelf');
 var path = require('path');
 
+
+// where would we put this?
 var db = Bookshelf.initialize({
   client: 'sqlite3',
   connection: {

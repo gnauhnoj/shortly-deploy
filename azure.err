@@ -1,0 +1,9 @@
+Wed May 14 2014 12:11:50 GMT-0700 (PDT):
+{ [Error: The subscription 'c315cbb0-ac60-4f68-9be0-9ad93dfb59b' was not found. Please check your spelling, or use the azure login command to set your subscription.]
+  stack: [Getter/Setter],
+  __frame: undefined,
+  rawStack: [Getter] }
+Error: The subscription 'c315cbb0-ac60-4f68-9be0-9ad93dfb59b' was not found. Please check your spelling, or use the azure login command to set your subscription.
+    at Profile._.extend.getSubscription (/usr/local/lib/node_modules/azure-cli/lib/util/profile/profile.js:175:15)
+    at __4 (/usr/local/lib/node_modules/azure-cli/lib/commands/account._js:98:41)
+

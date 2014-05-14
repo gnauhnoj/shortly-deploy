@@ -12,7 +12,9 @@ app.configure(function() {
   app.use(partials());
   app.use(express.bodyParser());
   app.use(express.static(__dirname + '/public'));
-  app.use(express.cookieParser('shhhh, very secret'));
+
+  // where would you put this?
+  app.use(express.cookieParser(process.env.secret || 'shhhh, very secret'));
   app.use(express.session());
 });
 
