@@ -14,7 +14,7 @@ app.configure(function() {
   app.use(express.static(__dirname + '/public'));
 
   // where would you put this?
-  app.use(express.cookieParser(process.env.secret || 'client shh, secret'));
+  app.use(express.cookieParser(process.env.secret || 'shhhh, very secret'));
   app.use(express.session());
 });
 
