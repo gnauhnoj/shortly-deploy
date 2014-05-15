@@ -1,47 +1,56 @@
-var Bookshelf = require('bookshelf');
-var path = require('path');
+var mongoose = exports.mongoose = require('mongoose');
+var crypto = require('crypto');
+var bcrypt = require('bcrypt-nodejs');
+var Promise = require('bluebird');
 
+var connectionString = process.env.CUSTOMCONNSTR_MONGOLAB_URI || 'mongodb://localhost/test';
 
-// where would we put this?
-var db = Bookshelf.initialize({
-  client: 'sqlite3',
-  connection: {
-    host: '127.0.0.1',
-    user: 'your_database_user',
-    password: 'password',
-    database: 'shortlydb',
-    charset: 'utf8',
-    filename: path.join(__dirname, '../db/shortly.sqlite')
-  }
+mongoose.connect(connectionString);
+var Schema = mongoose.Schema;
+
+var db = mongoose.connection;
+db.on('error', console.error.bind(console, 'connection error:'));
+
+exports.urlSchema = new Schema({
+  url: String,
+  base_url: String,
+  code: String,
+  title: String,
+  visits: Number,
 });
 
-db.knex.schema.hasTable('urls').then(function(exists) {
-  if (!exists) {
-    db.knex.schema.createTable('urls', function (link) {
-      link.increments('id').primary();
-      link.string('url', 255);
-      link.string('base_url', 255);
-      link.string('code', 100);
-      link.string('title', 255);
-      link.integer('visits');
-      link.timestamps();
-    }).then(function (table) {
-      console.log('Created Table', table);
-    });
-  }
+// this should actually be an event listener
+exports.urlSchema.methods.hashLink = exports.hashLink = function(link) {
+    var shasum = crypto.createHash('sha1');
+    shasum.update(link.url);
+    link.code = shasum.digest('hex').slice(0, 5);
+};
+
+
+exports.urlSchema.pre('save', function(next){
+  exports.hashLink(this);
+  next();
 });
 
-db.knex.schema.hasTable('users').then(function(exists) {
-  if (!exists) {
-    db.knex.schema.createTable('users', function (user) {
-      user.increments('id').primary();
-      user.string('username', 100).unique();
-      user.string('password', 100);
-      user.timestamps();
-    }).then(function (table) {
-      console.log('Created Table', table);
-    });
-  }
+
+exports.userSchema = new Schema({
+  username: String,
+  password: String,
 });
 
-module.exports = db;
+// these should actually be event listeners
+exports.userSchema.methods.comparePassword = exports.comparePassword = function(attemptedPassword, user, callback) {
+  bcrypt.compare(attemptedPassword, user.password, function(err, isMatch) {
+    console.log(err);
+    callback(isMatch);
+  });
+};
+
+exports.userSchema.methods.hashPassword = exports.hashPassword = function(user) {
+    user.password = bcrypt.hashSync(user.password, null);
+};
+
+exports.userSchema.pre('save', function(next){
+  exports.hashPassword(this);
+  next();
+});
